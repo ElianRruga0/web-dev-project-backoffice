@@ -1,4 +1,6 @@
 import GoBack from "@/components/GoBack";
+import { isOperatorAtom } from "@/state";
+import { useAtomValue } from "jotai";
 import { NextPage } from "next";
 import Link from "next/link";
 import React from "react";
@@ -10,9 +12,11 @@ import {
 } from "react-icons/io5";
 
 const Reservations: NextPage = () => {
+  const isOperator = useAtomValue(isOperatorAtom);
+
   return (
     <div className="container mx-auto py-14">
-      <GoBack />
+      {!isOperator ? <GoBack /> : <></>}
 
       <h1 className="text-4xl font-bold italic">Reservations</h1>
 

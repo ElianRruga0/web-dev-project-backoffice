@@ -35,7 +35,7 @@ const Login: NextPage = () => {
           toast.success("Login was successfull! Please wait to be redirected.");
 
           setTimeout(() => {
-            router.push(`${operator ? "/operator" : "/"}`);
+            router.push(`${operator ? "/reservations" : "/"}`);
           }, 3000);
         }
       })

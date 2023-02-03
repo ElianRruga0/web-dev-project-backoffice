@@ -1,5 +1,13 @@
+import { getActivities } from "@/queries/activities";
+import { getDestionations } from "@/queries/destinations";
+import { getReservations } from "@/queries/reservations";
+import { userAtom } from "@/state";
+import { useAtomValue } from "jotai";
+import { useAtomCallback } from "jotai/utils";
+import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { useCallback, useEffect, useState } from "react";
 import {
   IoBicycleSharp,
   IoMapSharp,
@@ -9,9 +17,35 @@ import {
   IoMail,
   IoWalkSharp,
 } from "react-icons/io5";
+import { createEmitAndSemanticDiagnosticsBuilderProgram } from "typescript";
 
 export default function Home() {
-  const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [destinations, setDestinations] = useState<any>([]);
+  const [activities, setActivities] = useState<any>([]);
+  const [reservations, setReservations] = useState<any>([]);
+
+  const user = useAtomValue(userAtom);
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const destinations = await getDestionations();
+      const activities = await getActivities();
+
+      if (user) {
+        const reservations = await getReservations(user.token).catch(() =>
+          router.push("/login")
+        );
+        setDestinations(destinations.destinations);
+        setActivities(activities.activities);
+        setReservations(reservations.reservations);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user]);
 
   if (!loading)
     return (
@@ -41,24 +75,35 @@ export default function Home() {
 
             <h1 className="mb-4">Last 5 destinations added:</h1>
 
-            {Array.from(Array(5).keys()).map((_, i) => (
-              <Link
-                key={i}
-                href="/destinations/[id]"
-                as={`/destinations/${1}`}
-                className="flex items-center gap-2 border-b border-b-black py-2 last:border-b-0"
-              >
-                <div className="w-14 h-14 bg-red-500 rounded-lg"></div>
+            {Array.isArray(destinations) ? (
+              destinations.map((destination, i) => (
+                <Link
+                  key={i}
+                  href="/destinations/[id]"
+                  as={`/destinations/${destination.id}`}
+                  className="flex items-center gap-2 border-b border-b-black py-2 last:border-b-0"
+                >
+                  <div className="w-14 h-14 bg-gray-300 rounded-lg relative overflow-hidden">
+                    <Image
+                      alt="image"
+                      src={`http://161.35.26.84/images/${destination.image}`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                  </div>
 
-                <h1 className="text-2xl text-zinc-700 uppercase tracking-widest">
-                  Durres
-                </h1>
+                  <h1 className="text-2xl text-zinc-700 uppercase tracking-widest">
+                    {destination.name}
+                  </h1>
 
-                <div className="grow flex flex-row-reverse">
-                  <IoArrowForwardCircle className=" text-3xl" />
-                </div>
-              </Link>
-            ))}
+                  <div className="grow flex flex-row-reverse">
+                    <IoArrowForwardCircle className=" text-3xl" />
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <></>
+            )}
           </div>
 
           <div className="bg-white shadow-2xl p-4 rounded flex flex-col gap-4 h-fit">
@@ -157,5 +202,10 @@ export default function Home() {
         </div>
       </div>
     );
-  else return <h1 className="text-3xl font-bold underline">Loading</h1>;
+  else
+    return (
+      <div className="container mx-auto py-14">
+        <h1 className="text-3xl font-bold underline">Loading</h1>
+      </div>
+    );
 }

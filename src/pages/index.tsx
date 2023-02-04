@@ -172,7 +172,9 @@ export default function Home() {
 
               <h1 className="text-xl font-medium">
                 Reservations{" "}
-                <span className="text-red-900 font-semibold">( 43 )</span>
+                <span className="text-red-900 font-semibold">
+                  ( {reservations.length} total )
+                </span>
               </h1>
 
               <Link
@@ -185,36 +187,46 @@ export default function Home() {
 
             <h1 className="mb-4">Last 5 reservations made:</h1>
 
-            {Array.from(Array(5).keys()).map((_, i) => (
-              <Link
-                key={i}
-                href="/reservations/[id]"
-                as={`/reservations/${1}`}
-                className="flex  gap-2 border-b border-b-black py-2 last:border-b-0"
-              >
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1">
-                    <IoPersonCircleSharp className="text-2xl text-zinc-700" />
-                    <h1 className="text-lg text-zinc-700">Elian Rruga</h1>
+            {Array.isArray(reservations) ? (
+              reservations.map((reservation, i) => (
+                <Link
+                  key={i}
+                  href="/reservations/[id]"
+                  as={`/reservations/${reservation.id}`}
+                  className="flex  gap-2 border-b border-b-black py-2 last:border-b-0"
+                >
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-1">
+                      <IoPersonCircleSharp className="text-2xl text-zinc-700" />
+                      <h1 className="text-lg text-zinc-700">
+                        {reservation.name} {reservation.surname}
+                      </h1>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <IoMail className="text-2xl text-zinc-700" />
+                      <h1 className="text-lg text-zinc-700">
+                        {reservation.email}
+                      </h1>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <IoWalkSharp className="text-2xl text-zinc-700" />
+                      <h1 className="text-lg text-zinc-700">
+                        {reservation.guests} guests
+                      </h1>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-1">
-                    <IoMail className="text-2xl text-zinc-700" />
-                    <h1 className="text-lg text-zinc-700">test@gmail.com</h1>
+                  <div className="grow flex flex-row-reverse items-center">
+                    <IoArrowForwardCircle className=" text-3xl" />
                   </div>
-                </div>
-                <div className="flex flex-col items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <IoWalkSharp className="text-2xl text-zinc-700" />
-                    <h1 className="text-lg text-zinc-700">5 guests</h1>
-                  </div>
-                </div>
-
-                <div className="grow flex flex-row-reverse items-center">
-                  <IoArrowForwardCircle className=" text-3xl" />
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))
+            ) : (
+              <></>
+            )}
           </div>
         </div>
       </div>

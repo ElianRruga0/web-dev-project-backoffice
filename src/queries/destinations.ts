@@ -38,7 +38,7 @@ export const deleteDestionation = async (id: any, token: any) => {
 }
 
 export const updateDestionation = async (id: any, token: any, data: any) => {
-    const req = await axios.put(`destination/${id}`, data, {
+    const req = await axios.post(`destination/${id}`, data, {
         headers: {
             'Authorization': `Bearer ${token}`
         }

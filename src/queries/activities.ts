@@ -39,7 +39,7 @@ export const deleteActivity = async (id: any, token: any) => {
 }
 
 export const updateActivity = async (id: any, token: any, data: any) => {
-    const req = await axios.put(`activities/${id}`, data, {
+    const req = await axios.post(`activities/${id}`, data, {
         headers: {
             'Authorization': `Bearer ${token}`
         }

@@ -2,6 +2,7 @@ import { getActivities } from "@/queries/activities";
 import { getDestionations } from "@/queries/destinations";
 import { getReservations } from "@/queries/reservations";
 import { userAtom } from "@/state";
+import dayjs from "dayjs";
 import { useAtomValue } from "jotai";
 import { useAtomCallback } from "jotai/utils";
 import Image from "next/image";
@@ -17,7 +18,6 @@ import {
   IoMail,
   IoWalkSharp,
 } from "react-icons/io5";
-import { createEmitAndSemanticDiagnosticsBuilderProgram } from "typescript";
 
 export default function Home() {
   const router = useRouter();
@@ -62,7 +62,9 @@ export default function Home() {
 
               <h1 className="text-xl font-medium">
                 Destinations{" "}
-                <span className="text-red-900 font-semibold">( 32 )</span>
+                <span className="text-red-900 font-semibold">
+                  ( {destinations.length} total )
+                </span>
               </h1>
 
               <Link
@@ -76,7 +78,7 @@ export default function Home() {
             <h1 className="mb-4">Last 5 destinations added:</h1>
 
             {Array.isArray(destinations) ? (
-              destinations.map((destination, i) => (
+              destinations.slice(0, 5).map((destination, i) => (
                 <Link
                   key={i}
                   href="/destinations/[id]"
@@ -112,7 +114,9 @@ export default function Home() {
 
               <h1 className="text-xl font-medium">
                 Activities{" "}
-                <span className="text-red-900 font-semibold">( 12 )</span>
+                <span className="text-red-900 font-semibold">
+                  ( {activities.length} total )
+                </span>
               </h1>
 
               <Link
@@ -125,28 +129,41 @@ export default function Home() {
 
             <h1 className="mb-4">Last 5 activities added:</h1>
 
-            {Array.from(Array(5).keys()).map((_, i) => (
-              <Link
-                key={i}
-                href="/activities/[id]"
-                as={`/activities/${1}`}
-                className="flex items-center gap-2 border-b border-b-black py-2 last:border-b-0"
-              >
-                <div className="w-14 h-14 bg-red-500 rounded-lg flex-none"></div>
+            {Array.isArray(activities) ? (
+              activities.map((activity, i) => (
+                <Link
+                  key={i}
+                  href="/activities/[id]"
+                  as={`/activities/${activity.id}`}
+                  className="flex items-center gap-2 border-b border-b-black py-2 last:border-b-0"
+                >
+                  <div className="w-14 h-14 bg-gray-300 rounded-lg flex-none relative overflow-hidden">
+                    <Image
+                      alt="image"
+                      src={`http://161.35.26.84/images/${activity.image}`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                  </div>
 
-                <div className="flex flex-col justify-between flex-none shrink">
-                  <h1 className="text-2xl text-zinc-700 uppercase tracking-widest leading-6  trunacte">
-                    Hiking on mountain
-                  </h1>
+                  <div className="flex flex-col justify-between flex-none shrink">
+                    <h1 className="text-2xl text-zinc-700 uppercase tracking-widest leading-6  trunacte">
+                      {activity.name}
+                    </h1>
 
-                  <h1 className="text-lg text-zinc-700">30/02/2023</h1>
-                </div>
+                    <h1 className="text-lg text-zinc-700">
+                      {dayjs(activity.startTime).format("DD/MM/YYYY HH:mm")}
+                    </h1>
+                  </div>
 
-                <div className="grow flex flex-row-reverse">
-                  <IoArrowForwardCircle className=" text-3xl" />
-                </div>
-              </Link>
-            ))}
+                  <div className="grow flex flex-row-reverse">
+                    <IoArrowForwardCircle className=" text-3xl" />
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <></>
+            )}
           </div>
 
           <div className="bg-white shadow-2xl p-4 rounded flex flex-col gap-4 h-fit">

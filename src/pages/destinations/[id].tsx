@@ -1,80 +1,134 @@
 import GoBack from "@/components/GoBack";
-import { NextPage } from "next";
-import React from "react";
+import {
+  getDestionation,
+  deleteDestionation,
+  updateDestionation,
+} from "@/queries/destinations";
+import { userAtom } from "@/state";
+import { useAtomValue } from "jotai";
+import { GetServerSideProps, NextPage } from "next";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import React, { useEffect, useRef, useState } from "react";
 import { IoPencilSharp } from "react-icons/io5";
 
-const Destination: NextPage = () => {
-  return (
-    <div className="container mx-auto py-14">
-      <GoBack />
+const Destination: NextPage<{ id: any }> = ({ id }) => {
+  const router = useRouter();
+  const user = useAtomValue(userAtom);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [destination, setDestination] = useState<any>({});
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button className="bg-white p-2 rounded">
-            <IoPencilSharp className="text-2xl " />
+  const [dName, setDname] = useState<any>();
+  const dNameRef = useRef<HTMLInputElement>(null);
+
+  const [dDescription, setDdescription] = useState<any>();
+  const dDescriptionRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const destination = await getDestionation(id);
+
+      setDestination(destination.destination);
+      setDname(destination.destination.name);
+      setDdescription(destination.destination.description);
+      setLoading(false);
+    };
+
+    fetchData();
+  }, []);
+
+  const handleDelete = async () => {
+    await deleteDestionation(id, user.token)
+      .then(() => router.push("/destinations"))
+      .catch(() => router.push("/login"));
+  };
+
+  const handleUpdate = async () => {
+    await updateDestionation(id, user.token, {
+      name: dName,
+      description: dDescription,
+    })
+      .then(() => router.reload())
+      .catch(() => router.push("/login"));
+  };
+
+  if (!loading && destination)
+    return (
+      <div className="container mx-auto py-14">
+        <GoBack />
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              className="bg-white p-2 rounded"
+              onClick={() => dNameRef.current?.focus()}
+            >
+              <IoPencilSharp className="text-2xl " />
+            </button>
+            <input
+              className="text-4xl font-bold italic outline-none bg-transparent"
+              value={dName}
+              onChange={(e) => setDname(e.target.value)}
+              ref={dNameRef}
+            />
+          </div>
+
+          <button
+            onClick={handleDelete}
+            className="bg-red-800 px-4 py-2 text-white text-center rounded-lg uppercase font-bold text-xl"
+          >
+            Delete
           </button>
-          <input
-            className="text-4xl font-bold italic outline-none bg-transparent"
-            value="Durres"
-            disabled
+        </div>
+
+        <div className="w-full h-[620px] bg-gray-300 rounded-lg relative overflow-hidden my-8">
+          <Image
+            alt="image"
+            src={`http://161.35.26.84/images/${destination.image}`}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         </div>
 
-        <button className="bg-red-800 px-4 py-2 text-white text-center rounded-lg uppercase font-bold text-xl">
-          Delete
+        <button
+          className="bg-white p-2 rounded"
+          onClick={() => dDescriptionRef.current?.focus()}
+        >
+          <IoPencilSharp className="text-2xl " />
+        </button>
+
+        <textarea
+          className="w-full h-80 p-2  outline-none bg-transparent "
+          value={dDescription}
+          onChange={(e) => setDdescription(e.target.value)}
+          ref={dDescriptionRef}
+        />
+
+        <button
+          onClick={handleUpdate}
+          className="w-full py-3 bg-black rounded-lg text-white text-center uppercase text-xl tracking-widest"
+        >
+          Save changes
         </button>
       </div>
-
-      <div className="w-full h-96 bg-red-500 rounded-lg relative overflow-hidden my-8">
-        <button className="absolute z-20 right-3 top-3 p-2 rounded bg-white">
-          <IoPencilSharp className="text-lg " />
-        </button>
+    );
+  else
+    return (
+      <div className="container mx-auto py-14">
+        <h1 className="text-3xl font-bold underline">Loading</h1>
       </div>
+    );
+};
 
-      <button className="bg-white p-2 rounded">
-        <IoPencilSharp className="text-2xl " />
-      </button>
+export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+  const id = query?.id;
 
-      <textarea
-        className="w-full h-80 p-2  outline-none bg-transparent "
-        value="
-      Lorem ipsum dolor sit amet consectetur adipisicing elit. Labore facere
-      dolores veniam dolor doloremque, delectus nihil illo magnam laboriosam
-      earum. Architecto quos iste exercitationem dolores accusamus veritatis,
-      beatae sit quod, fugit ducimus laudantium possimus dicta corrupti
-      eligendi totam non distinctio. Ullam officia accusantium voluptatem,
-      aliquam id, commodi suscipit, reiciendis quasi unde et ea. Molestiae,
-      iste laudantium quos tempora porro doloremque accusantium consequuntur
-      impedit earum saepe velit cum blanditiis pariatur quaerat. Deserunt qui
-      repellat aut, eligendi aliquam aspernatur voluptatum fugit quos
-      laboriosam cumque ipsa nulla iste illum repudiandae officiis consequatur
-      eos iusto consectetur. Quasi voluptatibus minima, consequatur, facilis
-      sint eaque exercitationem, deleniti recusandae quo illum totam
-      molestias? Iure optio repellat atque quidem autem non beatae et maiores
-      veritatis rerum, quasi iusto laudantium accusantium recusandae
-      cupiditate temporibus laborum quibusdam similique nesciunt. Temporibus
-      inventore et at ipsam quod commodi autem similique, nam rem dolorum
-      maiores atque cum enim veritatis alias accusantium tempora sint saepe!
-      Dolorum vero commodi, sed velit iure rem ex beatae quae doloribus
-      impedit nobis sunt officia necessitatibus a natus id, magni
-      reprehenderit quia, eveniet asperiores illum. Dolorem consequuntur
-      doloribus, est possimus nulla earum blanditiis, sapiente quo,
-      repellendus molestias impedit tempora quod voluptatibus odio modi
-      provident laboriosam natus velit atque et accusamus maiores. Delectus
-      distinctio necessitatibus animi sunt vel labore, possimus consequatur
-      vitae atque nemo magni voluptate autem quaerat ex beatae consequuntur
-      ullam laudantium corporis. Consequuntur quisquam officia, voluptates,
-      sed eius accusamus aliquam voluptate iste, autem voluptas rem expedita!
-      Tenetur, error minima. Atque et molestiae temporibus ipsa, facere, quos,
-      esse beatae ducimus numquam odit similique consequuntur!
-      "
-      />
-
-      <button className="w-full py-3 bg-black rounded-lg text-white text-center uppercase text-xl tracking-widest">
-        Save changes
-      </button>
-    </div>
-  );
+  return {
+    props: {
+      id,
+    },
+  };
 };
 
 export default Destination;

@@ -1,62 +1,86 @@
 import GoBack from "@/components/GoBack";
+import { getActivities } from "@/queries/activities";
+import dayjs from "dayjs";
 import { NextPage } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { IoSearchCircleSharp } from "react-icons/io5";
 
 const Activities: NextPage = () => {
-  return (
-    <div className="container mx-auto py-14">
-      <GoBack />
-      <h1 className="text-4xl font-bold italic">Activities</h1>
+  const [loading, setLoading] = useState<boolean>(true);
+  const [activities, setActivities] = useState<any>([]);
 
-      <p className="text-lg text-zinc-600">
-        Here you can see all the activities
-      </p>
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const activities = await getActivities();
 
-      <div className="flex flex-col gap-6 mt-8">
-        {Array.from(Array(10).keys()).map((_, i) => (
-          <Link
-            href="/activities/[id]"
-            as={`/activities/${1}`}
-            key={i}
-            className="flex  p-4 bg-white shadow-2xl gap-4"
-          >
-            <div className="w-1/4 h-60 bg-red-500 relative overflow-hidden rounded-lg shrink-0"></div>
+      setActivities(activities.activities);
 
-            <div className="flex flex-col gap-4 grow">
-              <h1 className="text-3xl font-medium text-zinc-700">
-                Hiking on mountain
-              </h1>
+      setLoading(false);
+    };
 
-              <p className="text-zinc-700">
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                Recusandae hic molestias veritatis libero officia alias vero
-                eius! Earum, voluptates maiores? Asperiores nostrum, ipsam ut
-                sapiente ipsum aperiam animi eaque perspiciatis amet aliquid
-                minima maiores, veritatis nemo culpa molestiae exercitationem
-                mollitia commodi deleniti enim delectus! Nostrum eveniet
-                excepturi aliquam aut quibusdam. Nemo, natus? Quam, ducimus id
-                ad debitis doloribus, nihil nesciunt corrupti veniam repudiandae
-                numquam nisi soluta eligendi laudantium enim itaque temporibus
-                accusamus excepturi sit, delectus perspiciatis officia
-                accusantium earum! Architecto dolorem quo eos reiciendis
-                molestiae vel porro sint ab tempora.
-              </p>
+    fetchData();
+  }, []);
 
-              <h1 className="text-xl text-zinc-700 underline">
-                30/12/2023 10:00 AM
-              </h1>
-            </div>
+  if (!loading)
+    return (
+      <div className="container mx-auto py-14">
+        <GoBack />
+        <h1 className="text-4xl font-bold italic">Activities</h1>
 
-            <div className="flex items-center justify-center">
-              <IoSearchCircleSharp className="text-6xl" />
-            </div>
-          </Link>
-        ))}
+        <p className="text-lg text-zinc-600">
+          Here you can see all the activities
+        </p>
+
+        <div className="flex flex-col gap-6 mt-8">
+          {Array.isArray(activities) ? (
+            activities.map((activity, i) => (
+              <Link
+                href="/activities/[id]"
+                as={`/activities/${activity.id}`}
+                key={i}
+                className="flex  p-4 bg-white shadow-2xl gap-4"
+              >
+                <div className="w-1/4 h-60 bg-gray-300 relative overflow-hidden rounded-lg shrink-0">
+                  <Image
+                    alt="image"
+                    src={`http://161.35.26.84/images/${activity.image}`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-4 grow">
+                  <h1 className="text-3xl font-medium text-zinc-700">
+                    {activity.name}
+                  </h1>
+
+                  <p className="text-zinc-700">{activity.description}</p>
+
+                  <h1 className="text-xl text-zinc-700 underline">
+                    {dayjs(activity.startTime).format("DD/MM/YYYY HH:mm")}
+                  </h1>
+                </div>
+
+                <div className="flex items-center justify-center">
+                  <IoSearchCircleSharp className="text-6xl" />
+                </div>
+              </Link>
+            ))
+          ) : (
+            <></>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  else
+    return (
+      <div className="container mx-auto py-14">
+        <h1 className="text-3xl font-bold underline">Loading</h1>
+      </div>
+    );
 };
 
 export default Activities;
